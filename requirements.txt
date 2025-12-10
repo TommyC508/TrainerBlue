@@ -1,0 +1,38 @@
+# Core
+python>=3.9
+
+# WebSocket & Async
+websockets>=10.0
+aiohttp>=3.8.0
+
+# Data & ML
+numpy>=1.21.0
+torch>=1.12.0
+
+# RL
+gymnasium>=0.26.0
+stable-baselines3>=2.0.0
+tensorboard>=2.10.0
+shimmy>=0.2.1
+
+# Data validation
+pydantic>=2.0.0
+
+# Utilities
+python-dotenv>=0.19.0
+pyyaml>=6.0
+tenacity>=8.0.0
+tqdm>=4.64.0
+
+# Logging
+structlog>=22.0.0
+
+# Testing
+pytest>=7.0.0
+pytest-asyncio>=0.20.0
+pytest-cov>=4.0.0
+
+# Code Quality
+black>=22.0.0
+mypy>=0.950
+isort>=5.10.0

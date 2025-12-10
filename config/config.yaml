@@ -1,0 +1,28 @@
+# General configuration
+project_name: pokemon-showdown-agent
+version: 0.1.0
+
+# Pokemon Showdown
+showdown:
+  server_url: "sim3.psim.us:8000"
+  format: "gen9randombattle"  # Random battles for testing
+  avatar: "1"
+
+# Agent
+agent:
+  type: "heuristic"  # random, heuristic, minimax, rl
+  search_depth: 2
+  temperature: 1.0
+
+# Logging
+logging:
+  level: "INFO"
+  format: "json"
+  output: "logs/agent.log"
+
+# Paths
+paths:
+  data: "data"
+  models: "models"
+  logs: "logs"
+  replays: "replays"
