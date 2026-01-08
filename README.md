@@ -232,6 +232,145 @@ This project bridges game AI research with practical competitive gaming applicat
 - ⏳ Battle replay analysis
 - ⏳ Performance documentation
 
+### Bi-Weekly Development Timeline
+
+**Current Status: Phase 3 Complete (Week 0)**
+- ✅ Training infrastructure operational
+- ✅ Initial models trained (100k & 500k timesteps)
+- ✅ Benchmarking system implemented
+- ✅ 156% reward improvement achieved
+
+**Weeks 1-2: Environment Enhancement (Phase 4A)**
+- 🎯 Integrate real damage calculator into environment
+- 🎯 Implement proper type effectiveness system
+- 🎯 Add status conditions (burn, paralysis, sleep)
+- 🎯 Implement speed-based turn order
+- 🎯 Add move effects and basic abilities
+- **Deliverable**: Enhanced environment with realistic battle mechanics
+- **Metric**: Pass 50+ unit tests for battle mechanics
+
+**Weeks 3-4: Reward Function & Action Masking (Phase 4B)**
+- 🎯 Design improved reward function (+100 win, -100 loss, HP differential)
+- 🎯 Implement dynamic action masking system
+- 🎯 Add intermediate rewards (KO bonuses, HP advantage)
+- 🎯 Create reward visualization tools
+- 🎯 Test reward correlation with win outcomes
+- **Deliverable**: Optimized reward system with validated masking
+- **Metric**: Reward function correlates >0.9 with battle outcomes
+
+**Weeks 5-6: Extended Training Run (Phase 4C)**
+- 🎯 Train PPO model for 1M timesteps with 16 parallel environments
+- 🎯 Implement automatic checkpointing every 100k steps
+- 🎯 Monitor training stability and convergence
+- 🎯 Tune hyperparameters (learning rate, batch size, entropy coefficient)
+- 🎯 Compare against Phase 3 models
+- **Deliverable**: 1M timestep model with improved performance
+- **Metric**: >30% win rate vs heuristic agent
+
+**Weeks 7-8: Curriculum Learning Implementation (Phase 4D)**
+- 🎯 Stage 1: Basic mechanics training (100k steps)
+- 🎯 Stage 2: vs Random agent (300k steps)
+- 🎯 Stage 3: vs Heuristic agent (500k steps)
+- 🎯 Stage 4: Self-play initial implementation (200k steps)
+- 🎯 Automate curriculum progression
+- **Deliverable**: Multi-stage training pipeline
+- **Metric**: Progressive improvement across all stages
+
+**Weeks 9-10: Advanced Self-Play System (Phase 4E)**
+- 🎯 Implement policy pool with 5-10 versions
+- 🎯 Create opponent sampling strategy
+- 🎯 Train 2M timesteps with self-play
+- 🎯 Monitor policy diversity metrics
+- 🎯 Prevent policy collapse through entropy regularization
+- **Deliverable**: Self-play trained model with diverse strategies
+- **Metric**: >50% win rate vs heuristic, action entropy >1.5
+
+**Weeks 11-12: Algorithm Comparison Study (Phase 4F)**
+- 🎯 Train DQN agent (1M timesteps)
+- 🎯 Train A2C agent (1M timesteps)
+- 🎯 Comprehensive benchmark: PPO vs DQN vs A2C
+- 🎯 Analyze convergence speed and sample efficiency
+- 🎯 Document algorithm trade-offs
+- **Deliverable**: Algorithm comparison report and best model selection
+- **Metric**: Identify algorithm with highest win rate and training efficiency
+
+**Weeks 13-14: Battle Format Expansion (Phase 5A)**
+- 🎯 Extend environment to support OU (OverUsed) tier
+- 🎯 Implement team preview phase
+- 🎯 Train multi-format agent
+- 🎯 Test transfer learning from Random Battle to OU
+- 🎯 Evaluate performance across formats
+- **Deliverable**: Multi-format capable agent
+- **Metric**: >40% win rate in both Random Battle and OU
+
+**Weeks 15-16: Live Server Integration (Phase 5B)**
+- 🎯 Implement WebSocket connection pooling
+- 🎯 Add automatic battle queue management
+- 🎯 Create session management and error recovery
+- 🎯 Deploy agent to Pokemon Showdown ladder
+- 🎯 Monitor live performance and collect battle logs
+- **Deliverable**: Operational agent on live server
+- **Metric**: Successfully complete 100 ladder battles
+
+**Weeks 17-18: Online Learning & Adaptation (Phase 5C)**
+- 🎯 Implement online learning pipeline
+- 🎯 Add experience buffer for replay
+- 🎯 Fine-tune agent with human opponent data
+- 🎯 Monitor Elo rating progression
+- 🎯 Analyze meta-game adaptation
+- **Deliverable**: Continuously improving live agent
+- **Metric**: Reach Elo 1200+ on ladder
+
+**Weeks 19-20: Visualization & Analysis Tools (Phase 5D)**
+- 🎯 Build battle replay viewer
+- 🎯 Create policy visualization dashboard
+- 🎯 Implement attention mechanism analysis
+- 🎯 Generate strategy heatmaps
+- 🎯 Document emergent behaviors
+- **Deliverable**: Interactive analysis toolkit
+- **Metric**: Identify and document 10+ strategic patterns
+
+**Weeks 21-22: Optimization & Scaling (Phase 6A)**
+- 🎯 Profile training pipeline for bottlenecks
+- 🎯 Optimize environment step speed (target: <10ms)
+- 🎯 Implement model quantization for inference
+- 🎯 Scale to 32 parallel environments
+- 🎯 Reduce model inference time to <50ms
+- **Deliverable**: High-performance training system
+- **Metric**: 2x training throughput improvement
+
+**Weeks 23-24: Advanced Features & Polish (Phase 6B)**
+- 🎯 Implement opponent modeling network
+- 🎯 Add team builder integration
+- 🎯 Create ensemble prediction system
+- 🎯 Build comprehensive documentation
+- 🎯 Prepare research paper draft
+- **Deliverable**: Publication-ready agent with documentation
+- **Metric**: >60% win rate vs heuristic, Elo 1400+
+
+**Milestones & Success Criteria**
+
+| Week | Phase | Key Metric | Success Threshold |
+|------|-------|------------|-------------------|
+| 2 | 4A | Environment Tests | 50+ passing |
+| 4 | 4B | Reward Correlation | >0.9 |
+| 6 | 4C | Win vs Heuristic | >30% |
+| 8 | 4D | Curriculum Stages | 4 complete |
+| 10 | 4E | Win vs Heuristic | >50% |
+| 12 | 4F | Best Algorithm | Identified |
+| 14 | 5A | Multi-Format | 2 formats working |
+| 16 | 5B | Ladder Battles | 100 completed |
+| 18 | 5C | Ladder Elo | 1200+ |
+| 20 | 5D | Strategic Patterns | 10+ documented |
+| 22 | 6A | Training Speed | 2x faster |
+| 24 | 6B | Final Win Rate | >60% |
+
+**Timeline Flexibility**
+- Timeline assumes ~20 hours/week development time
+- Milestones can be adjusted based on experimental results
+- High-priority items can be accelerated by parallelizing tasks
+- Research exploration may extend certain phases
+
 ### Challenges and Mitigations
 
 **Challenge 1: Large State/Action Space**
