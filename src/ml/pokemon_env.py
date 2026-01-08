@@ -102,10 +102,10 @@ class PokemonBattleEnv(gym.Env):
         if not self.state:
             return
         
-        # Expanded Pokemon data with 24 species covering all types and strategic roles
+        # Massively expanded Pokemon data with 60+ species covering all types and roles
         # Format: species, types, base stats (hp, atk, def, spa, spd, spe), ability
         pokemon_data = [
-            # Starter trio - Balanced all-rounders
+            # Gen 1 Starters
             {"species": "Charizard", "types": ["Fire", "Flying"], "ability": "Blaze",
              "stats": {"hp": 78, "atk": 84, "def": 78, "spa": 109, "spd": 85, "spe": 100}},
             {"species": "Blastoise", "types": ["Water"], "ability": "Torrent",
@@ -113,116 +113,313 @@ class PokemonBattleEnv(gym.Env):
             {"species": "Venusaur", "types": ["Grass", "Poison"], "ability": "Overgrow",
              "stats": {"hp": 80, "atk": 82, "def": 83, "spa": 100, "spd": 100, "spe": 80}},
             
-            # Fast special attackers
+            # Gen 2 Starters
+            {"species": "Typhlosion", "types": ["Fire"], "ability": "Blaze",
+             "stats": {"hp": 78, "atk": 84, "def": 78, "spa": 109, "spd": 85, "spe": 100}},
+            {"species": "Feraligatr", "types": ["Water"], "ability": "Torrent",
+             "stats": {"hp": 85, "atk": 105, "def": 100, "spa": 79, "spd": 83, "spe": 78}},
+            {"species": "Meganium", "types": ["Grass"], "ability": "Overgrow",
+             "stats": {"hp": 80, "atk": 82, "def": 100, "spa": 83, "spd": 100, "spe": 80}},
+            
+            # Gen 3 Starters
+            {"species": "Blaziken", "types": ["Fire", "Fighting"], "ability": "Blaze",
+             "stats": {"hp": 80, "atk": 120, "def": 70, "spa": 110, "spd": 70, "spe": 80}},
+            {"species": "Swampert", "types": ["Water", "Ground"], "ability": "Torrent",
+             "stats": {"hp": 100, "atk": 110, "def": 90, "spa": 85, "spd": 90, "spe": 60}},
+            {"species": "Sceptile", "types": ["Grass"], "ability": "Overgrow",
+             "stats": {"hp": 70, "atk": 85, "def": 65, "spa": 105, "spd": 85, "spe": 120}},
+            
+            # Fast Special Attackers
             {"species": "Gengar", "types": ["Ghost", "Poison"], "ability": "Levitate",
              "stats": {"hp": 60, "atk": 65, "def": 60, "spa": 130, "spd": 75, "spe": 110}},
             {"species": "Alakazam", "types": ["Psychic"], "ability": "Synchronize",
              "stats": {"hp": 55, "atk": 50, "def": 45, "spa": 135, "spd": 95, "spe": 120}},
             {"species": "Jolteon", "types": ["Electric"], "ability": "Volt Absorb",
              "stats": {"hp": 65, "atk": 65, "def": 60, "spa": 110, "spd": 95, "spe": 130}},
+            {"species": "Espeon", "types": ["Psychic"], "ability": "Synchronize",
+             "stats": {"hp": 65, "atk": 65, "def": 60, "spa": 130, "spd": 95, "spe": 110}},
+            {"species": "Starmie", "types": ["Water", "Psychic"], "ability": "Natural Cure",
+             "stats": {"hp": 60, "atk": 75, "def": 85, "spa": 100, "spd": 85, "spe": 115}},
+            {"species": "Raikou", "types": ["Electric"], "ability": "Pressure",
+             "stats": {"hp": 90, "atk": 85, "def": 75, "spa": 115, "spd": 100, "spe": 115}},
             
-            # Bulky physical attackers
+            # Physical Attackers
             {"species": "Dragonite", "types": ["Dragon", "Flying"], "ability": "Multiscale",
              "stats": {"hp": 91, "atk": 134, "def": 95, "spa": 100, "spd": 100, "spe": 80}},
             {"species": "Tyranitar", "types": ["Rock", "Dark"], "ability": "Sand Stream",
              "stats": {"hp": 100, "atk": 134, "def": 110, "spa": 95, "spd": 100, "spe": 61}},
             {"species": "Machamp", "types": ["Fighting"], "ability": "Guts",
              "stats": {"hp": 90, "atk": 130, "def": 80, "spa": 65, "spd": 85, "spe": 55}},
+            {"species": "Salamence", "types": ["Dragon", "Flying"], "ability": "Intimidate",
+             "stats": {"hp": 95, "atk": 135, "def": 80, "spa": 110, "spd": 80, "spe": 100}},
+            {"species": "Metagross", "types": ["Steel", "Psychic"], "ability": "Clear Body",
+             "stats": {"hp": 80, "atk": 135, "def": 130, "spa": 95, "spd": 90, "spe": 70}},
+            {"species": "Garchomp", "types": ["Dragon", "Ground"], "ability": "Sand Veil",
+             "stats": {"hp": 108, "atk": 130, "def": 95, "spa": 80, "spd": 85, "spe": 102}},
+            {"species": "Lucario", "types": ["Fighting", "Steel"], "ability": "Inner Focus",
+             "stats": {"hp": 70, "atk": 110, "def": 70, "spa": 115, "spd": 70, "spe": 90}},
             
-            # Defensive walls
+            # Defensive Walls
             {"species": "Blissey", "types": ["Normal"], "ability": "Natural Cure",
              "stats": {"hp": 255, "atk": 10, "def": 10, "spa": 75, "spd": 135, "spe": 55}},
             {"species": "Skarmory", "types": ["Steel", "Flying"], "ability": "Sturdy",
              "stats": {"hp": 65, "atk": 80, "def": 140, "spa": 40, "spd": 70, "spe": 70}},
             {"species": "Snorlax", "types": ["Normal"], "ability": "Thick Fat",
              "stats": {"hp": 160, "atk": 110, "def": 65, "spa": 65, "spd": 110, "spe": 30}},
+            {"species": "Umbreon", "types": ["Dark"], "ability": "Synchronize",
+             "stats": {"hp": 95, "atk": 65, "def": 110, "spa": 60, "spd": 130, "spe": 65}},
+            {"species": "Vaporeon", "types": ["Water"], "ability": "Water Absorb",
+             "stats": {"hp": 130, "atk": 65, "def": 60, "spa": 110, "spd": 95, "spe": 65}},
+            {"species": "Suicune", "types": ["Water"], "ability": "Pressure",
+             "stats": {"hp": 100, "atk": 75, "def": 115, "spa": 90, "spd": 115, "spe": 85}},
             
-            # Type specialists
+            # Balanced Attackers
             {"species": "Gyarados", "types": ["Water", "Flying"], "ability": "Intimidate",
              "stats": {"hp": 95, "atk": 125, "def": 79, "spa": 60, "spd": 100, "spe": 81}},
             {"species": "Arcanine", "types": ["Fire"], "ability": "Intimidate",
              "stats": {"hp": 90, "atk": 110, "def": 80, "spa": 100, "spd": 80, "spe": 95}},
             {"species": "Exeggutor", "types": ["Grass", "Psychic"], "ability": "Chlorophyll",
              "stats": {"hp": 95, "atk": 95, "def": 85, "spa": 125, "spd": 75, "spe": 55}},
-            {"species": "Starmie", "types": ["Water", "Psychic"], "ability": "Natural Cure",
-             "stats": {"hp": 60, "atk": 75, "def": 85, "spa": 100, "spd": 85, "spe": 115}},
             {"species": "Lapras", "types": ["Water", "Ice"], "ability": "Water Absorb",
              "stats": {"hp": 130, "atk": 85, "def": 80, "spa": 85, "spd": 95, "spe": 60}},
+            {"species": "Zapdos", "types": ["Electric", "Flying"], "ability": "Pressure",
+             "stats": {"hp": 90, "atk": 90, "def": 85, "spa": 125, "spd": 90, "spe": 100}},
+            {"species": "Moltres", "types": ["Fire", "Flying"], "ability": "Pressure",
+             "stats": {"hp": 90, "atk": 100, "def": 90, "spa": 125, "spd": 85, "spe": 90}},
+            {"species": "Articuno", "types": ["Ice", "Flying"], "ability": "Pressure",
+             "stats": {"hp": 90, "atk": 85, "def": 100, "spa": 95, "spd": 125, "spe": 85}},
             
-            # Unique niches
-            {"species": "Pikachu", "types": ["Electric"], "ability": "Static",
-             "stats": {"hp": 35, "atk": 55, "def": 40, "spa": 50, "spd": 50, "spe": 90}},
-            {"species": "Mewtwo", "types": ["Psychic"], "ability": "Pressure",
-             "stats": {"hp": 106, "atk": 110, "def": 90, "spa": 154, "spd": 90, "spe": 130}},
-            {"species": "Mew", "types": ["Psychic"], "ability": "Synchronize",
-             "stats": {"hp": 100, "atk": 100, "def": 100, "spa": 100, "spd": 100, "spe": 100}},
-            
-            # Additional coverage
+            # Type Specialists
+            {"species": "Flareon", "types": ["Fire"], "ability": "Flash Fire",
+             "stats": {"hp": 65, "atk": 130, "def": 60, "spa": 95, "spd": 110, "spe": 65}},
+            {"species": "Leafeon", "types": ["Grass"], "ability": "Leaf Guard",
+             "stats": {"hp": 65, "atk": 110, "def": 130, "spa": 60, "spd": 65, "spe": 95}},
+            {"species": "Glaceon", "types": ["Ice"], "ability": "Snow Cloak",
+             "stats": {"hp": 65, "atk": 60, "def": 110, "spa": 130, "spd": 95, "spe": 65}},
             {"species": "Golem", "types": ["Rock", "Ground"], "ability": "Sturdy",
              "stats": {"hp": 80, "atk": 120, "def": 130, "spa": 55, "spd": 65, "spe": 45}},
             {"species": "Cloyster", "types": ["Water", "Ice"], "ability": "Shell Armor",
              "stats": {"hp": 50, "atk": 95, "def": 180, "spa": 85, "spd": 45, "spe": 70}},
             {"species": "Nidoking", "types": ["Poison", "Ground"], "ability": "Poison Point",
              "stats": {"hp": 81, "atk": 102, "def": 77, "spa": 85, "spd": 75, "spe": 85}},
+            {"species": "Nidoqueen", "types": ["Poison", "Ground"], "ability": "Poison Point",
+             "stats": {"hp": 90, "atk": 92, "def": 87, "spa": 75, "spd": 85, "spe": 76}},
             {"species": "Aerodactyl", "types": ["Rock", "Flying"], "ability": "Pressure",
              "stats": {"hp": 80, "atk": 105, "def": 65, "spa": 60, "spd": 75, "spe": 130}},
+            
+            # Legendaries
+            {"species": "Mewtwo", "types": ["Psychic"], "ability": "Pressure",
+             "stats": {"hp": 106, "atk": 110, "def": 90, "spa": 154, "spd": 90, "spe": 130}},
+            {"species": "Mew", "types": ["Psychic"], "ability": "Synchronize",
+             "stats": {"hp": 100, "atk": 100, "def": 100, "spa": 100, "spd": 100, "spe": 100}},
+            {"species": "Lugia", "types": ["Psychic", "Flying"], "ability": "Pressure",
+             "stats": {"hp": 106, "atk": 90, "def": 130, "spa": 90, "spd": 154, "spe": 110}},
+            {"species": "Ho-Oh", "types": ["Fire", "Flying"], "ability": "Pressure",
+             "stats": {"hp": 106, "atk": 130, "def": 90, "spa": 110, "spd": 154, "spe": 90}},
+            {"species": "Rayquaza", "types": ["Dragon", "Flying"], "ability": "Air Lock",
+             "stats": {"hp": 105, "atk": 150, "def": 90, "spa": 150, "spd": 90, "spe": 95}},
+            {"species": "Kyogre", "types": ["Water"], "ability": "Drizzle",
+             "stats": {"hp": 100, "atk": 100, "def": 90, "spa": 150, "spd": 140, "spe": 90}},
+            {"species": "Groudon", "types": ["Ground"], "ability": "Drought",
+             "stats": {"hp": 100, "atk": 150, "def": 140, "spa": 100, "spd": 90, "spe": 90}},
+            
+            # Versatile Picks
+            {"species": "Pikachu", "types": ["Electric"], "ability": "Static",
+             "stats": {"hp": 35, "atk": 55, "def": 40, "spa": 50, "spd": 50, "spe": 90}},
+            {"species": "Raichu", "types": ["Electric"], "ability": "Static",
+             "stats": {"hp": 60, "atk": 90, "def": 55, "spa": 90, "spd": 80, "spe": 110}},
+            {"species": "Ninetales", "types": ["Fire"], "ability": "Flash Fire",
+             "stats": {"hp": 73, "atk": 76, "def": 75, "spa": 81, "spd": 100, "spe": 100}},
+            {"species": "Vileplume", "types": ["Grass", "Poison"], "ability": "Chlorophyll",
+             "stats": {"hp": 75, "atk": 80, "def": 85, "spa": 110, "spd": 90, "spe": 50}},
+            {"species": "Poliwrath", "types": ["Water", "Fighting"], "ability": "Water Absorb",
+             "stats": {"hp": 90, "atk": 95, "def": 95, "spa": 70, "spd": 90, "spe": 70}},
+            {"species": "Magnezone", "types": ["Electric", "Steel"], "ability": "Magnet Pull",
+             "stats": {"hp": 70, "atk": 70, "def": 115, "spa": 130, "spd": 90, "spe": 60}},
+            {"species": "Scizor", "types": ["Bug", "Steel"], "ability": "Technician",
+             "stats": {"hp": 70, "atk": 130, "def": 100, "spa": 55, "spd": 80, "spe": 65}},
+            {"species": "Heracross", "types": ["Bug", "Fighting"], "ability": "Guts",
+             "stats": {"hp": 80, "atk": 125, "def": 75, "spa": 40, "spd": 95, "spe": 85}},
+            {"species": "Kingdra", "types": ["Water", "Dragon"], "ability": "Swift Swim",
+             "stats": {"hp": 75, "atk": 95, "def": 95, "spa": 95, "spd": 95, "spe": 85}},
+            {"species": "Togekiss", "types": ["Fairy", "Flying"], "ability": "Serene Grace",
+             "stats": {"hp": 85, "atk": 50, "def": 95, "spa": 120, "spd": 115, "spe": 80}},
         ]
         
-        # Comprehensive moves database covering all 18 types
+        # Massively expanded moves database covering all types with multiple options
         # Format: type -> {name, type, category, power, accuracy}
         moves_db = {
+            # Fire moves
             "Fire": {"name": "Flamethrower", "type": "Fire", "category": "Special", "power": 90, "accuracy": 100},
+            "Fire2": {"name": "Fire Blast", "type": "Fire", "category": "Special", "power": 110, "accuracy": 85},
+            "Fire3": {"name": "Flare Blitz", "type": "Fire", "category": "Physical", "power": 120, "accuracy": 100},
+            "Fire4": {"name": "Heat Wave", "type": "Fire", "category": "Special", "power": 95, "accuracy": 90},
+            
+            # Water moves
             "Water": {"name": "Hydro Pump", "type": "Water", "category": "Special", "power": 110, "accuracy": 80},
+            "Water2": {"name": "Surf", "type": "Water", "category": "Special", "power": 90, "accuracy": 100},
+            "Water3": {"name": "Waterfall", "type": "Water", "category": "Physical", "power": 80, "accuracy": 100},
+            "Water4": {"name": "Scald", "type": "Water", "category": "Special", "power": 80, "accuracy": 100},
+            
+            # Grass moves
             "Grass": {"name": "Energy Ball", "type": "Grass", "category": "Special", "power": 90, "accuracy": 100},
+            "Grass2": {"name": "Solar Beam", "type": "Grass", "category": "Special", "power": 120, "accuracy": 100},
+            "Grass3": {"name": "Giga Drain", "type": "Grass", "category": "Special", "power": 75, "accuracy": 100},
+            "Grass4": {"name": "Wood Hammer", "type": "Grass", "category": "Physical", "power": 120, "accuracy": 100},
+            
+            # Electric moves
             "Electric": {"name": "Thunderbolt", "type": "Electric", "category": "Special", "power": 90, "accuracy": 100},
+            "Electric2": {"name": "Thunder", "type": "Electric", "category": "Special", "power": 110, "accuracy": 70},
+            "Electric3": {"name": "Wild Charge", "type": "Electric", "category": "Physical", "power": 90, "accuracy": 100},
+            "Electric4": {"name": "Volt Switch", "type": "Electric", "category": "Special", "power": 70, "accuracy": 100},
+            
+            # Ice moves
             "Ice": {"name": "Ice Beam", "type": "Ice", "category": "Special", "power": 90, "accuracy": 100},
+            "Ice2": {"name": "Blizzard", "type": "Ice", "category": "Special", "power": 110, "accuracy": 70},
+            "Ice3": {"name": "Ice Punch", "type": "Ice", "category": "Physical", "power": 75, "accuracy": 100},
+            "Ice4": {"name": "Icicle Crash", "type": "Ice", "category": "Physical", "power": 85, "accuracy": 90},
+            
+            # Fighting moves
             "Fighting": {"name": "Close Combat", "type": "Fighting", "category": "Physical", "power": 120, "accuracy": 100},
+            "Fighting2": {"name": "Brick Break", "type": "Fighting", "category": "Physical", "power": 75, "accuracy": 100},
+            "Fighting3": {"name": "Focus Blast", "type": "Fighting", "category": "Special", "power": 120, "accuracy": 70},
+            "Fighting4": {"name": "Drain Punch", "type": "Fighting", "category": "Physical", "power": 75, "accuracy": 100},
+            
+            # Poison moves
             "Poison": {"name": "Sludge Bomb", "type": "Poison", "category": "Special", "power": 90, "accuracy": 100},
+            "Poison2": {"name": "Gunk Shot", "type": "Poison", "category": "Physical", "power": 120, "accuracy": 80},
+            "Poison3": {"name": "Poison Jab", "type": "Poison", "category": "Physical", "power": 80, "accuracy": 100},
+            
+            # Ground moves
             "Ground": {"name": "Earthquake", "type": "Ground", "category": "Physical", "power": 100, "accuracy": 100},
+            "Ground2": {"name": "Earth Power", "type": "Ground", "category": "Special", "power": 90, "accuracy": 100},
+            "Ground3": {"name": "Drill Run", "type": "Ground", "category": "Physical", "power": 80, "accuracy": 95},
+            
+            # Flying moves
             "Flying": {"name": "Air Slash", "type": "Flying", "category": "Special", "power": 75, "accuracy": 95},
+            "Flying2": {"name": "Brave Bird", "type": "Flying", "category": "Physical", "power": 120, "accuracy": 100},
+            "Flying3": {"name": "Hurricane", "type": "Flying", "category": "Special", "power": 110, "accuracy": 70},
+            "Flying4": {"name": "Acrobatics", "type": "Flying", "category": "Physical", "power": 55, "accuracy": 100},
+            
+            # Psychic moves
             "Psychic": {"name": "Psychic", "type": "Psychic", "category": "Special", "power": 90, "accuracy": 100},
+            "Psychic2": {"name": "Psyshock", "type": "Psychic", "category": "Special", "power": 80, "accuracy": 100},
+            "Psychic3": {"name": "Zen Headbutt", "type": "Psychic", "category": "Physical", "power": 80, "accuracy": 90},
+            "Psychic4": {"name": "Future Sight", "type": "Psychic", "category": "Special", "power": 120, "accuracy": 100},
+            
+            # Bug moves
             "Bug": {"name": "Bug Buzz", "type": "Bug", "category": "Special", "power": 90, "accuracy": 100},
+            "Bug2": {"name": "X-Scissor", "type": "Bug", "category": "Physical", "power": 80, "accuracy": 100},
+            "Bug3": {"name": "Megahorn", "type": "Bug", "category": "Physical", "power": 120, "accuracy": 85},
+            "Bug4": {"name": "U-turn", "type": "Bug", "category": "Physical", "power": 70, "accuracy": 100},
+            
+            # Rock moves
             "Rock": {"name": "Stone Edge", "type": "Rock", "category": "Physical", "power": 100, "accuracy": 80},
+            "Rock2": {"name": "Rock Slide", "type": "Rock", "category": "Physical", "power": 75, "accuracy": 90},
+            "Rock3": {"name": "Power Gem", "type": "Rock", "category": "Special", "power": 80, "accuracy": 100},
+            
+            # Ghost moves
             "Ghost": {"name": "Shadow Ball", "type": "Ghost", "category": "Special", "power": 80, "accuracy": 100},
+            "Ghost2": {"name": "Shadow Claw", "type": "Ghost", "category": "Physical", "power": 70, "accuracy": 100},
+            "Ghost3": {"name": "Phantom Force", "type": "Ghost", "category": "Physical", "power": 90, "accuracy": 100},
+            
+            # Dragon moves
             "Dragon": {"name": "Dragon Claw", "type": "Dragon", "category": "Physical", "power": 80, "accuracy": 100},
+            "Dragon2": {"name": "Draco Meteor", "type": "Dragon", "category": "Special", "power": 130, "accuracy": 90},
+            "Dragon3": {"name": "Outrage", "type": "Dragon", "category": "Physical", "power": 120, "accuracy": 100},
+            "Dragon4": {"name": "Dragon Pulse", "type": "Dragon", "category": "Special", "power": 85, "accuracy": 100},
+            
+            # Dark moves
             "Dark": {"name": "Dark Pulse", "type": "Dark", "category": "Special", "power": 80, "accuracy": 100},
+            "Dark2": {"name": "Crunch", "type": "Dark", "category": "Physical", "power": 80, "accuracy": 100},
+            "Dark3": {"name": "Knock Off", "type": "Dark", "category": "Physical", "power": 65, "accuracy": 100},
+            "Dark4": {"name": "Sucker Punch", "type": "Dark", "category": "Physical", "power": 70, "accuracy": 100},
+            
+            # Steel moves
             "Steel": {"name": "Flash Cannon", "type": "Steel", "category": "Special", "power": 80, "accuracy": 100},
+            "Steel2": {"name": "Iron Head", "type": "Steel", "category": "Physical", "power": 80, "accuracy": 100},
+            "Steel3": {"name": "Meteor Mash", "type": "Steel", "category": "Physical", "power": 90, "accuracy": 90},
+            
+            # Fairy moves
             "Fairy": {"name": "Moonblast", "type": "Fairy", "category": "Special", "power": 95, "accuracy": 100},
+            "Fairy2": {"name": "Play Rough", "type": "Fairy", "category": "Physical", "power": 90, "accuracy": 90},
+            "Fairy3": {"name": "Dazzling Gleam", "type": "Fairy", "category": "Special", "power": 80, "accuracy": 100},
+            
+            # Normal moves
             "Normal": {"name": "Body Slam", "type": "Normal", "category": "Physical", "power": 85, "accuracy": 100},
+            "Normal2": {"name": "Hyper Beam", "type": "Normal", "category": "Special", "power": 150, "accuracy": 90},
+            "Normal3": {"name": "Return", "type": "Normal", "category": "Physical", "power": 102, "accuracy": 100},
+            "Normal4": {"name": "Quick Attack", "type": "Normal", "category": "Physical", "power": 40, "accuracy": 100},
         }
         
-        # Additional coverage moves
+        # Popular coverage moves that many Pokemon learn
         coverage_moves = {
             "Surf": {"name": "Surf", "type": "Water", "category": "Special", "power": 90, "accuracy": 100},
             "Thunderbolt": {"name": "Thunderbolt", "type": "Electric", "category": "Special", "power": 90, "accuracy": 100},
             "Ice Beam": {"name": "Ice Beam", "type": "Ice", "category": "Special", "power": 90, "accuracy": 100},
-            "Fire Blast": {"name": "Fire Blast", "type": "Fire", "category": "Special", "power": 110, "accuracy": 85},
-            "Thunder": {"name": "Thunder", "type": "Electric", "category": "Special", "power": 110, "accuracy": 70},
-            "Blizzard": {"name": "Blizzard", "type": "Ice", "category": "Special", "power": 110, "accuracy": 70},
-            "Solar Beam": {"name": "Solar Beam", "type": "Grass", "category": "Special", "power": 120, "accuracy": 100},
-            "Giga Drain": {"name": "Giga Drain", "type": "Grass", "category": "Special", "power": 75, "accuracy": 100},
-            "Brick Break": {"name": "Brick Break", "type": "Fighting", "category": "Physical", "power": 75, "accuracy": 100},
-            "Rock Slide": {"name": "Rock Slide", "type": "Rock", "category": "Physical", "power": 75, "accuracy": 90},
+            "Flamethrower": {"name": "Flamethrower", "type": "Fire", "category": "Special", "power": 90, "accuracy": 100},
+            "Earthquake": {"name": "Earthquake", "type": "Ground", "category": "Physical", "power": 100, "accuracy": 100},
+            "Psychic": {"name": "Psychic", "type": "Psychic", "category": "Special", "power": 90, "accuracy": 100},
+            "Shadow Ball": {"name": "Shadow Ball", "type": "Ghost", "category": "Special", "power": 80, "accuracy": 100},
+            "Focus Blast": {"name": "Focus Blast", "type": "Fighting", "category": "Special", "power": 120, "accuracy": 70},
+            "Energy Ball": {"name": "Energy Ball", "type": "Grass", "category": "Special", "power": 90, "accuracy": 100},
+            "Stone Edge": {"name": "Stone Edge", "type": "Rock", "category": "Physical", "power": 100, "accuracy": 80},
+            "Iron Head": {"name": "Iron Head", "type": "Steel", "category": "Physical", "power": 80, "accuracy": 100},
+            "Crunch": {"name": "Crunch", "type": "Dark", "category": "Physical", "power": 80, "accuracy": 100},
+            "Thunder Punch": {"name": "Thunder Punch", "type": "Electric", "category": "Physical", "power": 75, "accuracy": 100},
+            "Fire Punch": {"name": "Fire Punch", "type": "Fire", "category": "Physical", "power": 75, "accuracy": 100},
+            "Ice Punch": {"name": "Ice Punch", "type": "Ice", "category": "Physical", "power": 75, "accuracy": 100},
         }
         
-        # Stat-changing moves (Status moves for competitive battling)
+        # Comprehensive stat-changing moves (Status moves for competitive strategy)
         stat_moves = {
+            # Attack boosts
             "Swords Dance": {"name": "Swords Dance", "type": "Normal", "category": "Status", "power": 0, "accuracy": -1, 
                            "boosts": {"atk": 2}},
-            "Dragon Dance": {"name": "Dragon Dance", "type": "Dragon", "category": "Status", "power": 0, "accuracy": -1,
-                           "boosts": {"atk": 1, "spe": 1}},
-            "Nasty Plot": {"name": "Nasty Plot", "type": "Dark", "category": "Status", "power": 0, "accuracy": -1,
-                         "boosts": {"spa": 2}},
-            "Calm Mind": {"name": "Calm Mind", "type": "Psychic", "category": "Status", "power": 0, "accuracy": -1,
-                        "boosts": {"spa": 1, "spd": 1}},
-            "Iron Defense": {"name": "Iron Defense", "type": "Steel", "category": "Status", "power": 0, "accuracy": -1,
-                           "boosts": {"def": 2}},
-            "Amnesia": {"name": "Amnesia", "type": "Psychic", "category": "Status", "power": 0, "accuracy": -1,
-                      "boosts": {"spd": 2}},
+            "Howl": {"name": "Howl", "type": "Normal", "category": "Status", "power": 0, "accuracy": -1,
+                   "boosts": {"atk": 1}},
+            
+            # Speed boosts
             "Agility": {"name": "Agility", "type": "Psychic", "category": "Status", "power": 0, "accuracy": -1,
                       "boosts": {"spe": 2}},
+            "Rock Polish": {"name": "Rock Polish", "type": "Rock", "category": "Status", "power": 0, "accuracy": -1,
+                          "boosts": {"spe": 2}},
+            
+            # Special Attack boosts
+            "Nasty Plot": {"name": "Nasty Plot", "type": "Dark", "category": "Status", "power": 0, "accuracy": -1,
+                         "boosts": {"spa": 2}},
+            "Growth": {"name": "Growth", "type": "Normal", "category": "Status", "power": 0, "accuracy": -1,
+                     "boosts": {"spa": 1, "atk": 1}},
+            
+            # Defense boosts
+            "Iron Defense": {"name": "Iron Defense", "type": "Steel", "category": "Status", "power": 0, "accuracy": -1,
+                           "boosts": {"defense": 2}},
+            "Acid Armor": {"name": "Acid Armor", "type": "Poison", "category": "Status", "power": 0, "accuracy": -1,
+                         "boosts": {"defense": 2}},
+            "Harden": {"name": "Harden", "type": "Normal", "category": "Status", "power": 0, "accuracy": -1,
+                     "boosts": {"defense": 1}},
+            
+            # Special Defense boosts
+            "Amnesia": {"name": "Amnesia", "type": "Psychic", "category": "Status", "power": 0, "accuracy": -1,
+                      "boosts": {"spd": 2}},
+            
+            # Multi-stat boosts (very popular in competitive)
+            "Dragon Dance": {"name": "Dragon Dance", "type": "Dragon", "category": "Status", "power": 0, "accuracy": -1,
+                           "boosts": {"atk": 1, "spe": 1}},
+            "Calm Mind": {"name": "Calm Mind", "type": "Psychic", "category": "Status", "power": 0, "accuracy": -1,
+                        "boosts": {"spa": 1, "spd": 1}},
             "Bulk Up": {"name": "Bulk Up", "type": "Fighting", "category": "Status", "power": 0, "accuracy": -1,
-                      "boosts": {"atk": 1, "def": 1}},
+                      "boosts": {"atk": 1, "defense": 1}},
+            "Curse": {"name": "Curse", "type": "Ghost", "category": "Status", "power": 0, "accuracy": -1,
+                    "boosts": {"atk": 1, "defense": 1, "spe": -1}},
+            "Coil": {"name": "Coil", "type": "Poison", "category": "Status", "power": 0, "accuracy": -1,
+                   "boosts": {"atk": 1, "defense": 1}},
+            "Quiver Dance": {"name": "Quiver Dance", "type": "Bug", "category": "Status", "power": 0, "accuracy": -1,
+                           "boosts": {"spa": 1, "spd": 1, "spe": 1}},
+            "Shell Smash": {"name": "Shell Smash", "type": "Normal", "category": "Status", "power": 0, "accuracy": -1,
+                          "boosts": {"atk": 2, "spa": 2, "spe": 2, "defense": -1, "spd": -1}},
+            "Work Up": {"name": "Work Up", "type": "Normal", "category": "Status", "power": 0, "accuracy": -1,
+                      "boosts": {"atk": 1, "spa": 1}},
         }
         
         # Randomly select 6 Pokemon for each team (with replacement for variety)
