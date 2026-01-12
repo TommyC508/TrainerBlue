@@ -11,7 +11,7 @@ import torch
 from ..agents.base_agent import Agent
 from ..battle.state import BattleState
 from ..connection.protocol import Action
-from .pokemon_env import PokemonBattleEnv
+from .environment import PokemonBattleEnv
 
 logger = logging.getLogger(__name__)
 
