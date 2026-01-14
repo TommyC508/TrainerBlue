@@ -44,7 +44,13 @@ async def main():
     # Get credentials
     username = get_env("PS_USERNAME")
     password = get_env("PS_PASSWORD")
-    server_url = get_env("PS_SERVER_URL", "sim3.psim.us:8000")
+    # Prefer a local Pokémon Showdown server (official engine) when available.
+    # Falls back to the public server if PS_SERVER_URL is not set or local isn't reachable.
+    configured_server_url = get_env("PS_SERVER_URL")
+    server_candidates = [configured_server_url] if configured_server_url else [
+        "localhost:8000",
+        "sim3.psim.us:8000",
+    ]
     
     if not username:
         logger.error("PS_USERNAME not set in .env file")
@@ -63,13 +69,35 @@ async def main():
     
     logger.info(f"Created agent: {agent.name}")
     
-    # Create client
-    client = ShowdownClient(server_url, username, password)
+    client = None
     
     try:
-        # Connect and login
-        await client.connect()
-        await client.login()
+        # Connect and login (try candidates in order)
+        last_error: Exception | None = None
+        for server_url in server_candidates:
+            if not server_url:
+                continue
+            try:
+                logger.info(f"Trying Pokemon Showdown server: {server_url}")
+                client = ShowdownClient(server_url, username, password)
+                await client.connect()
+                await client.login()
+                last_error = None
+                break
+            except Exception as e:
+                last_error = e
+                try:
+                    if client:
+                        await client.disconnect()
+                except Exception:
+                    pass
+                client = None
+
+        if not client:
+            raise RuntimeError(
+                "Could not connect/login to any configured Pokemon Showdown server. "
+                "If you want to run locally, start it with scripts/run_showdown_server.sh and set PS_SERVER_URL=localhost:8000."
+            ) from last_error
         
         logger.info("Connected and logged in successfully")
         
@@ -138,7 +166,8 @@ async def main():
         logger.error(f"Error: {e}", exc_info=True)
     finally:
         # Disconnect
-        await client.disconnect()
+        if client:
+            await client.disconnect()
         logger.info("Disconnected")
 
 

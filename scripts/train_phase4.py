@@ -17,20 +17,32 @@ from stable_baselines3.common.callbacks import CheckpointCallback, EvalCallback
 from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.env_util import make_vec_env
 
-from src.ml.environment import PokemonBattleEnv
-from src.agents.random_agent import RandomAgent
+from src.ml.showdown_env import ShowdownPokemonBattleEnv
 
 
-def make_env(rank=0, seed=0):
+def make_env(
+    rank=0,
+    seed=0,
+    formatid: str = "gen9randombattle",
+    team_p1: str | None = None,
+    team_p2: str | None = None,
+    timeout_s: float = 0.5,
+):
     """
     Create a Pokemon battle environment.
     
     Args:
         rank: Index of the environment
         seed: Random seed
+        timeout_s: Simulator read timeout (seconds)
     """
     def _init():
-        env = PokemonBattleEnv(opponent_agent=RandomAgent())
+        env = ShowdownPokemonBattleEnv(
+            formatid=formatid,
+            team_p1=team_p1,
+            team_p2=team_p2,
+            timeout_s=timeout_s,
+        )
         env.reset(seed=seed + rank)
         return env
     return _init
@@ -44,7 +56,11 @@ def train_phase4(
     log_dir="logs/phase4",
     checkpoint_freq=100000,
     eval_freq=50000,
-    resume=None
+    resume=None,
+    formatid: str = "gen9randombattle",
+    team_p1: str | None = None,
+    team_p2: str | None = None,
+    timeout_s: float = 0.5,
 ):
     """
     Train Phase 4 model with enhanced environment.
@@ -71,6 +87,10 @@ def train_phase4(
     print(f"  Log directory: {log_dir}")
     print(f"  Checkpoint frequency: {checkpoint_freq:,}")
     print(f"  Evaluation frequency: {eval_freq:,}")
+    print(f"  Timeout: {timeout_s}")
+    print(f"  Format: {formatid}")
+    if team_p1 or team_p2:
+        print("  Teams: custom")
     if resume:
         print(f"  Resuming from: {resume}")
     print()
@@ -83,19 +103,23 @@ def train_phase4(
     print(f"Creating {n_envs} parallel environments...")
     
     if n_envs == 1:
-        env = DummyVecEnv([make_env(0)])
+        env = DummyVecEnv([make_env(0, formatid=formatid, team_p1=team_p1, team_p2=team_p2, timeout_s=timeout_s)])
     elif n_envs <= 4:
-        env = DummyVecEnv([make_env(i) for i in range(n_envs)])
+        env = DummyVecEnv(
+            [make_env(i, formatid=formatid, team_p1=team_p1, team_p2=team_p2, timeout_s=timeout_s) for i in range(n_envs)]
+        )
     else:
         # Use SubprocVecEnv for better performance with many envs
-        env = SubprocVecEnv([make_env(i) for i in range(n_envs)])
+        env = SubprocVecEnv(
+            [make_env(i, formatid=formatid, team_p1=team_p1, team_p2=team_p2, timeout_s=timeout_s) for i in range(n_envs)]
+        )
     
     print("✅ Environments created")
     print()
     
     # Create evaluation environment
     print("Creating evaluation environment...")
-    eval_env = DummyVecEnv([make_env(1000)])  # Different seed
+    eval_env = DummyVecEnv([make_env(1000, formatid=formatid, team_p1=team_p1, team_p2=team_p2, timeout_s=timeout_s)])  # Different seed
     print("✅ Evaluation environment created")
     print()
     
@@ -346,6 +370,35 @@ Examples:
         default=None,
         help="Path to model to resume training from"
     )
+    parser.add_argument(
+        "--format",
+        dest="formatid",
+        type=str,
+        default="gen9randombattle",
+        help="Showdown format id (e.g. gen9randombattle, gen9ou). Non-random formats require teams.",
+    )
+    parser.add_argument(
+        "--p1-team",
+        dest="team_p1",
+        type=str,
+        default=None,
+        help="Path to a Showdown team export (or packed team string) for p1 (required for non-random formats).",
+    )
+    parser.add_argument(
+        "--p2-team",
+        dest="team_p2",
+        type=str,
+        default=None,
+        help="Path to a Showdown team export (or packed team string) for p2 (required for non-random formats).",
+    )
+
+    parser.add_argument(
+        "--sim-timeout",
+        dest="timeout_s",
+        type=float,
+        default=0.5,
+        help="Simulator read timeout in seconds (default: 0.5)",
+    )
     
     args = parser.parse_args()
     
@@ -357,7 +410,11 @@ Examples:
         log_dir=args.log_dir,
         checkpoint_freq=args.checkpoint_freq,
         eval_freq=args.eval_freq,
-        resume=args.resume
+        resume=args.resume,
+        formatid=args.formatid,
+        team_p1=args.team_p1,
+        team_p2=args.team_p2,
+        timeout_s=args.timeout_s,
     )
 
 

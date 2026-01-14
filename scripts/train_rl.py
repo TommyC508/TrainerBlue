@@ -2,9 +2,17 @@
 """Training script for RL agent."""
 import argparse
 import logging
+import os
+import sys
 from pathlib import Path
 
-from src.ml import RLAgent, create_vectorized_env
+from stable_baselines3.common.monitor import Monitor
+
+# Add project root to path (so `import src.*` works when run as a script)
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+from src.ml import RLAgent, PokemonBattleEnv, create_vectorized_env
+from src.ml.showdown_env import ShowdownPokemonBattleEnv
 from src.utils import setup_logging
 
 logger = logging.getLogger(__name__)
@@ -24,6 +32,13 @@ def main():
                        help="Batch size")
     parser.add_argument("--n-envs", type=int, default=4,
                        help="Number of parallel environments")
+    parser.add_argument("--backend", type=str, default="python",
+                       choices=["python", "showdown"],
+                       help="Training backend: 'python' (built-in simulator) or 'showdown' (official engine)")
+    parser.add_argument("--format", type=str, default="gen9randombattle",
+                       help="Showdown format id (used when --backend=showdown)")
+    parser.add_argument("--showdown-dir", type=str, default=None,
+                       help="Path to the Pokemon Showdown repo (defaults to external/pokemon-showdown)")
     parser.add_argument("--save-path", type=str, default="models/rl_agent",
                        help="Path to save model")
     parser.add_argument("--log-dir", type=str, default="logs/rl",
@@ -34,7 +49,11 @@ def main():
     parser.add_argument("--resume", type=str, default=None,
                        help="Path to resume training from")
     args = parser.parse_args()
-    
+
+    # Create directories (must exist before log file creation)
+    Path(args.save_path).mkdir(parents=True, exist_ok=True)
+    Path(args.log_dir).mkdir(parents=True, exist_ok=True)
+
     # Setup logging
     setup_logging(level="INFO", log_file=f"{args.log_dir}/training.log")
     
@@ -46,19 +65,33 @@ def main():
     logger.info(f"Learning rate: {args.learning_rate}")
     logger.info(f"Batch size: {args.batch_size}")
     logger.info(f"Parallel environments: {args.n_envs}")
+    logger.info(f"Backend: {args.backend}")
+    if args.backend == "showdown":
+        logger.info(f"Format: {args.format}")
     logger.info(f"Device: {args.device}")
-    
-    # Create directories
-    Path(args.save_path).mkdir(parents=True, exist_ok=True)
-    Path(args.log_dir).mkdir(parents=True, exist_ok=True)
-    
-    # Create vectorized environment for parallel training
+
+    # Create training env + eval env
     if args.n_envs > 1:
         logger.info(f"Creating {args.n_envs} parallel environments")
-        env = create_vectorized_env(n_envs=args.n_envs)
+        env = create_vectorized_env(
+            n_envs=args.n_envs,
+            backend=args.backend,
+            formatid=args.format,
+            showdown_dir=args.showdown_dir,
+        )
     else:
-        from src.ml import PokemonBattleEnv
-        env = PokemonBattleEnv()
+        if args.backend == "showdown":
+            env = Monitor(ShowdownPokemonBattleEnv(formatid=args.format, showdown_dir=args.showdown_dir))
+        else:
+            env = Monitor(PokemonBattleEnv())
+
+    # EvalCallback expects a VecEnv; keep eval isolated from training workers
+    eval_env = create_vectorized_env(
+        n_envs=1,
+        backend=args.backend,
+        formatid=args.format,
+        showdown_dir=args.showdown_dir,
+    )
     
     # Create agent
     logger.info("Creating RL agent...")
@@ -95,6 +128,7 @@ def main():
         model_path=args.resume,
         device=args.device,
         env=env,
+        eval_env=eval_env,
         **agent_params
     )
     

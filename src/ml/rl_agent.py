@@ -1,12 +1,12 @@
 """Reinforcement learning agent using Stable-Baselines3."""
+
 import logging
-from typing import Optional, Dict, Any
-import numpy as np
-from stable_baselines3 import PPO, DQN, A2C
+from typing import Optional
+
+from stable_baselines3 import A2C, DQN, PPO
 from stable_baselines3.common.callbacks import BaseCallback, EvalCallback
 from stable_baselines3.common.monitor import Monitor
-from stable_baselines3.common.vec_env import DummyVecEnv
-import torch
+from stable_baselines3.common.vec_env import DummyVecEnv, SubprocVecEnv
 
 from ..agents.base_agent import Agent
 from ..battle.state import BattleState
@@ -49,6 +49,8 @@ class RLAgent(Agent):
         algorithm: str = "PPO",
         model_path: Optional[str] = None,
         device: str = "auto",
+        env=None,
+        eval_env=None,
         **kwargs
     ):
         """
@@ -64,9 +66,12 @@ class RLAgent(Agent):
         
         self.algorithm_name = algorithm
         self.device = device
-        
-        # Create environment
-        self.env = PokemonBattleEnv()
+
+        # Environment(s)
+        # - `env` can be a Gym env or a VecEnv (DummyVecEnv/SubprocVecEnv)
+        # - `eval_env` should be a VecEnv for EvalCallback
+        self.env = env if env is not None else PokemonBattleEnv()
+        self.eval_env = eval_env
         
         # Create or load model
         if model_path:
@@ -129,12 +134,14 @@ class RLAgent(Agent):
             n_eval_episodes: Number of episodes for evaluation
         """
         logger.info(f"Starting training for {total_timesteps} timesteps")
+
+        eval_env = self.eval_env if self.eval_env is not None else self.env
         
         # Create callbacks
         callbacks = [
             TensorboardCallback(),
             EvalCallback(
-                self.env,
+                eval_env,
                 best_model_save_path=save_path,
                 log_path=log_dir,
                 eval_freq=eval_freq,
@@ -195,19 +202,33 @@ class RLAgent(Agent):
         logger.info(f"Model loaded from {path}")
 
 
-def create_vectorized_env(n_envs: int = 4) -> DummyVecEnv:
+def create_vectorized_env(
+    n_envs: int = 4,
+    backend: str = "python",
+    formatid: str = "gen9randombattle",
+    showdown_dir: str | None = None,
+):
+    """Create a vectorized environment for training.
+
+    Uses SubprocVecEnv for n_envs>1 so official Showdown subprocesses can run
+    concurrently and utilize multiple CPU cores.
     """
-    Create vectorized environment for parallel training.
-    
-    Args:
-        n_envs: Number of parallel environments
-        
-    Returns:
-        Vectorized environment
-    """
-    def make_env():
-        env = PokemonBattleEnv()
-        env = Monitor(env)
-        return env
-    
-    return DummyVecEnv([make_env for _ in range(n_envs)])
+
+    def _make(rank: int):
+        def _init():
+            if backend == "showdown":
+                from .showdown_env import ShowdownPokemonBattleEnv
+
+                env = ShowdownPokemonBattleEnv(formatid=formatid, showdown_dir=showdown_dir)
+            else:
+                env = PokemonBattleEnv()
+            env = Monitor(env)
+            env.reset(seed=rank)
+            return env
+
+        return _init
+
+    if n_envs <= 1:
+        return DummyVecEnv([_make(0)])
+
+    return SubprocVecEnv([_make(i) for i in range(n_envs)])

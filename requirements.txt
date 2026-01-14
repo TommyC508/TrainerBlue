@@ -1,5 +1,5 @@
 # Core
-python>=3.9
+# (Python version is managed by your environment; pip can't install Python itself.)
 
 # WebSocket & Async
 websockets>=10.0

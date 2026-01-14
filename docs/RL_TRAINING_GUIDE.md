@@ -20,6 +20,12 @@ pip install -r requirements.txt
 python scripts/train_rl.py --algorithm PPO --timesteps 100000 --n-envs 4
 ```
 
+### 2b. Run Training on the Official Showdown Engine (Recommended)
+
+```bash
+python scripts/train_rl.py --backend showdown --format gen9randombattle --algorithm PPO --timesteps 100000 --n-envs 4
+```
+
 ### 3. Evaluate Trained Agent
 
 ```bash
@@ -31,22 +37,34 @@ python scripts/evaluate_rl.py --model-path models/rl_agent.zip --episodes 100
 ### Components
 
 1. **PokemonBattleEnv** (`src/ml/environment.py`)
-   - Gymnasium environment wrapping Pokemon battles
-   - Observation space: Box(195,) - flattened battle state
-   - Action space: Discrete(10) - 4 moves + 6 switches
-   - Reward shaping for strategic play
+    - Gymnasium environment backed by the in-repo Python simulator
+    - Observation space: Box(202,) - flattened battle state
+    - Action space: Discrete(9) - 4 moves + up to 5 switches
 
-2. **RLAgent** (`src/ml/rl_agent.py`)
+2. **ShowdownPokemonBattleEnv** (`src/ml/showdown_env.py`)
+    - Gymnasium environment backed by the official Pokémon Showdown engine (`simulate-battle`)
+    - Observation/action shapes match the Python env so training scripts can switch backends
+
+3. **RLAgent** (`src/ml/rl_agent.py`)
    - Wrapper for StableBaselines3 algorithms
    - Supports PPO, DQN, A2C
    - Handles model save/load
-   - Converts battle states to observations
+    - Accepts a training env + an evaluation env (used by EvalCallback)
 
-3. **Training Script** (`scripts/train_rl.py`)
+4. **Training Script** (`scripts/train_rl.py`)
    - CLI for training agents
    - Parallel environment support
    - Tensorboard logging
    - Checkpoint saving
+
+### Backend Selection
+
+`scripts/train_rl.py` supports two backends:
+
+- `--backend python`: in-repo environment (fast iteration)
+- `--backend showdown`: official Showdown engine (highest fidelity)
+
+You can select the format used by the official engine with `--format` (example: `gen9randombattle`).
 
 ## Training Configuration
 

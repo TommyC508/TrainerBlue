@@ -1,5 +1,58 @@
 # Phase 2.5: Battle System Revamp - Pokemon Showdown Accuracy
 
+## Phase 2.5b: Official Pokémon Showdown Engine Integration
+
+**Status:** ✅ COMPLETED  
+**Completion Date:** January 14, 2026  
+**Goal:** Use the official Pokémon Showdown engine for RL training instead of maintaining a custom battle simulator.
+
+### Why Phase 2.5b exists
+
+Phase 2.5 focused on bringing a Python battle environment closer to Pokémon Showdown accuracy. That work was valuable (it proved the observation/action/reward wiring and enabled rapid iteration), but it still has an inherent limitation:
+
+- Any custom simulator risks subtle mechanic drift (edge cases, move interactions, future generation updates).
+
+Phase 2.5b addresses this by running training episodes directly on the official Showdown simulator via its CLI protocol (`simulate-battle`). This provides “engine-correct” mechanics for:
+
+- Damage, accuracy, crits, immunities
+- Status, volatile conditions, forced switching
+- Format rules (including Gen 9 Random Battles team generation)
+
+### What was implemented
+
+**Official engine source (submodule):**
+- `external/pokemon-showdown/` added as a git submodule.
+
+**Showdown-backed training environment:**
+- `src/ml/showdown_env.py` implements a Gymnasium environment that launches `pokemon-showdown simulate-battle` as a subprocess.
+- Observation shape intentionally matches the existing 202-dim vector so model architecture can be reused.
+
+**Process wrapper:**
+- `src/battle/showdown_process.py` manages the subprocess lifecycle and parses simulator output blocks.
+
+**Setup helpers:**
+- `scripts/setup_showdown.sh` builds the Showdown submodule.
+- `scripts/run_showdown_server.sh` starts a local server (optional; training uses `simulate-battle` and does not require a server).
+
+### How Phase 2.5 and Phase 2.5b relate
+
+- Explainability & speed: the Python simulator from Phase 2.5 is still useful for fast debugging and controlled experiments.
+- Ground truth mechanics: Phase 2.5b is the recommended training backend when you want maximum fidelity to official mechanics.
+
+### Quick usage
+
+Train using the official engine (Gen 9 Random Battles):
+
+```bash
+python scripts/train_rl.py --backend showdown --format gen9randombattle --algorithm PPO --timesteps 100000 --n-envs 4
+```
+
+If you want the legacy Python backend instead:
+
+```bash
+python scripts/train_rl.py --backend python --algorithm PPO --timesteps 100000 --n-envs 4
+```
+
 ## Overview
 
 **Status:** ✅ COMPLETED  

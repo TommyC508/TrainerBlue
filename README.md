@@ -57,6 +57,14 @@ This project bridges game AI research with practical competitive gaming applicat
    - Asynchronous message handling with `websockets` and `aiohttp`
    - Authentication and battle room management
 
+### Local Pokémon Showdown (official battle engine)
+
+This repo vendors the official Pokémon Showdown server as a git submodule, so you can run battles against a local server (useful for reliability and for working offline).
+
+- One-time setup: `scripts/setup_showdown.sh`
+- Run local server (default port 8000): `scripts/run_showdown_server.sh`
+- Point the bot at it: set `PS_SERVER_URL=localhost:8000` in your `.env`
+
 2. **Battle State Manager** (`src/battle/`)
    - Complete battle state tracking and updates
    - Pokemon data models (HP, stats, types, abilities, items)
