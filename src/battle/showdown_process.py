@@ -61,7 +61,7 @@ class ShowdownSimulatorProcess:
     def __init__(
         self,
         showdown_dir: str,
-        timeout_s: float = 4.0,
+        timeout_s: float = 2.0,
         env: Optional[dict[str, str]] = None,
     ):
         self.showdown_dir = showdown_dir

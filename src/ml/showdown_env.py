@@ -33,10 +33,11 @@ class ShowdownPokemonBattleEnv(gym.Env):
         team_p1: Optional[str] = None,
         team_p2: Optional[str] = None,
         max_turns: int = 200,
+        max_timeouts_startup: int = 10,
+        max_timeouts_step: int = 10,
         render_mode: Optional[str] = None,
         showdown_dir: Optional[str] = None,
         timeout_s: float = 2.0,
-        max_timeouts_startup: int = 100,
         record_protocol: bool = False,
     ):
         super().__init__()
@@ -45,8 +46,9 @@ class ShowdownPokemonBattleEnv(gym.Env):
         self._team_p1_raw = team_p1
         self._team_p2_raw = team_p2
         self.max_turns = max_turns
+        self.max_timeouts_startup = max_timeouts_startup
+        self.max_timeouts_step = max_timeouts_step
         self.render_mode = render_mode
-        self._max_timeouts_startup = max_timeouts_startup
 
         # Match the existing Phase 4 env architecture
         self.observation_space = spaces.Box(low=-1.0, high=1.0, shape=(202,), dtype=np.float32)
@@ -107,7 +109,7 @@ class ShowdownPokemonBattleEnv(gym.Env):
         )
 
         # Consume output until we have initial requests (or battle begins).
-        self._drain_until_requests_or_end(min_reads=5, max_timeouts=self._max_timeouts_startup)
+        self._drain_until_requests_or_end(min_reads=5, max_timeouts=self.max_timeouts_startup)
 
         # Initialize reward baselines
         self._prev_our_hp = self._sum_hp(self._state_p1.our_side.team)
@@ -151,7 +153,7 @@ class ShowdownPokemonBattleEnv(gym.Env):
 
         self._proc.write_lines([f">p1 {p1_choice}", f">p2 {p2_choice}"])
 
-        ended = self._drain_until_requests_or_end(min_reads=1, max_timeouts=10)
+        ended = self._drain_until_requests_or_end(min_reads=1, max_timeouts=self.max_timeouts_step)
 
         our_hp = self._sum_hp(self._state_p1.our_side.team)
         opp_hp = self._sum_hp(self._state_p2.our_side.team)

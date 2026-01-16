@@ -1,0 +1,12 @@
+Week 1
+
+This week the project has made some okay progress towards
+creating the right environment for the agent to train in.
+After last weeks progress, I noticed how Copilot basically
+made its own oversimplified version of pokemon gym to train
+the agent and was not very viable for my vision. I tried to
+improve the environment to something as close as I could get
+to the real showdown but found it way easier just to clone the
+whole showdown repository. I am encountering multiple issues
+with the implementation of the showdown battle simulation
+into a gym for training.
