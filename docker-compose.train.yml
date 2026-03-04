@@ -1,0 +1,24 @@
+services:
+  phase3-train:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: trainerblue-phase3-train
+    working_dir: /app
+    command:
+      [
+        "python",
+        "scripts/train_phase3_showdown.py",
+        "--timesteps",
+        "2000000",
+        "--n-envs",
+        "4",
+        "--save-path",
+        "models/ppo_phase3_showdown_new",
+        "--log-dir",
+        "logs/phase3_showdown_new"
+      ]
+    volumes:
+      - ./models:/app/models
+      - ./logs:/app/logs
+    restart: "no"
