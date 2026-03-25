@@ -8,7 +8,7 @@ from datetime import datetime
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from stable_baselines3 import PPO
-from stable_baselines3.common.vec_env import DummyVecEnv
+from stable_baselines3.common.vec_env import DummyVecEnv, SubprocVecEnv
 from stable_baselines3.common.callbacks import CheckpointCallback, EvalCallback
 
 from src.ml.showdown_env import ShowdownPokemonBattleEnv
@@ -42,6 +42,8 @@ def make_env(
 def train(
     timesteps: int = 100_000,
     n_envs: int = 1,
+    vec_env: str = "dummy",
+    device: str = "cpu",
     save_path: str = "models/ppo_phase3_showdown_new",
     log_dir: str = "logs/phase3_showdown_new",
     checkpoint_freq: int = 50_000,
@@ -60,6 +62,8 @@ def train(
     print("Configuration:")
     print(f"  Total timesteps: {timesteps:,}")
     print(f"  Parallel environments: {n_envs}")
+    print(f"  Vectorized env backend: {vec_env}")
+    print(f"  Device: {device}")
     print(f"  Save path: {save_path}")
     print(f"  Log directory: {log_dir}")
     print(f"  Checkpoint frequency: {checkpoint_freq:,}")
@@ -78,7 +82,10 @@ def train(
         make_env(i, formatid=formatid, team_p1=team_p1, team_p2=team_p2, timeout_s=timeout_s, max_timeouts_startup=max_timeouts_startup)
         for i in range(n_envs)
     ]
-    env = DummyVecEnv(env_fns)
+    if vec_env == "subproc" and n_envs > 1:
+        env = SubprocVecEnv(env_fns, start_method="spawn")
+    else:
+        env = DummyVecEnv(env_fns)
 
     print("✅ Environments created")
     print()
@@ -122,7 +129,7 @@ def train(
         ent_coef=0.01,
         vf_coef=0.5,
         max_grad_norm=0.5,
-        device="auto",
+        device=device,
     )
     print("✅ Model created")
     print()
@@ -162,6 +169,8 @@ def main():
     parser = argparse.ArgumentParser(description="Phase 3 re-training with Showdown backend")
     parser.add_argument("--timesteps", type=int, default=100000)
     parser.add_argument("--n-envs", type=int, default=1)
+    parser.add_argument("--vec-env", choices=["dummy", "subproc"], default="dummy")
+    parser.add_argument("--device", choices=["cpu", "cuda", "auto"], default="cpu")
     parser.add_argument("--save-path", type=str, default="models/ppo_phase3_showdown_new")
     parser.add_argument("--log-dir", type=str, default="logs/phase3_showdown_new")
     parser.add_argument("--checkpoint-freq", type=int, default=50000)
@@ -177,6 +186,8 @@ def main():
     train(
         timesteps=args.timesteps,
         n_envs=args.n_envs,
+        vec_env=args.vec_env,
+        device=args.device,
         save_path=args.save_path,
         log_dir=args.log_dir,
         checkpoint_freq=args.checkpoint_freq,
