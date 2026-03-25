@@ -90,9 +90,20 @@ def train(
     print("✅ Environments created")
     print()
 
-    eval_env = DummyVecEnv([
-        make_env(10_000, formatid=formatid, team_p1=team_p1, team_p2=team_p2, timeout_s=timeout_s, max_timeouts_startup=max_timeouts_startup)
-    ])
+    eval_env_fns = [
+        make_env(
+            10_000,
+            formatid=formatid,
+            team_p1=team_p1,
+            team_p2=team_p2,
+            timeout_s=timeout_s,
+            max_timeouts_startup=max_timeouts_startup,
+        )
+    ]
+    if isinstance(env, SubprocVecEnv):
+        eval_env = SubprocVecEnv(eval_env_fns, start_method="spawn")
+    else:
+        eval_env = DummyVecEnv(eval_env_fns)
     print("✅ Evaluation environment created")
     print()
 
