@@ -28,7 +28,7 @@ class PokemonBattleEnv(gym.Env):
     def __init__(
         self,
         opponent_agent=None,
-        max_turns: int = 100,
+        max_turns: int = 50,
         render_mode: Optional[str] = None
     ):
         """
@@ -36,7 +36,7 @@ class PokemonBattleEnv(gym.Env):
         
         Args:
             opponent_agent: Agent to play against (if None, uses random)
-            max_turns: Maximum turns before battle ends in draw
+            max_turns: Maximum turns before battle ends in draw (default 50 to encourage deciding finishes)
             render_mode: Render mode for visualization
         """
         super().__init__()
@@ -116,6 +116,10 @@ class PokemonBattleEnv(gym.Env):
         # Check if battle is over
         terminated = self._is_battle_over()
         truncated = self.current_turn >= self.max_turns
+        
+        # Penalize turn limit timeout (punish draws)
+        if truncated and not terminated:
+            reward -= 25.0  # Penalty for not finishing decisively
         
         observation = self._get_observation()
         info = self._get_info()
@@ -457,13 +461,13 @@ class PokemonBattleEnv(gym.Env):
     def _calculate_reward(self, our_active: Pokemon, opp_active: Pokemon,
                          our_hp_before: int, opp_hp_before: int) -> float:
         """
-        Calculate reward for the turn using improved win-focused reward function.
+        Calculate reward for the turn using KO-focused reward function.
         
         Reward components:
-        - Win/Loss: +100/-100
-        - HP advantage: +0.5 per % difference
-        - KO bonus: +5/-5
-        - Turn efficiency: -0.1 per turn
+        - Win/Loss terminal: +100/-100 (big payoff for decisive victories)
+        - KO bonus: +50/-50 (heavily incentivize knockouts)
+        - HP advantage: +0.2 per % difference (minor intermediate reward)
+        - Turn efficiency penalty: -0.05 per turn (encourage speed)
         """
         reward = 0.0
         
@@ -472,24 +476,24 @@ class PokemonBattleEnv(gym.Env):
         opp_alive = sum(1 for p in self.state.opponent_side.team if p.hp > 0)
         
         if our_alive == 0 or opp_alive == 0:
-            # Battle over - big win/loss reward
+            # Battle over - terminal reward
             if our_alive > opp_alive:
-                reward += 100.0  # Win
+                reward += 100.0  # Win bonus
             else:
-                reward -= 100.0  # Loss
+                reward -= 100.0  # Loss penalty
         
-        # HP advantage reward
+        # KO bonuses (heavily weighted to incentivize knockouts)
+        if opp_active.hp == 0 and opp_hp_before > 0:
+            reward += 50.0  # Knocked out opponent Pokemon
+        
+        if our_active.hp == 0 and our_hp_before > 0:
+            reward -= 50.0  # Our Pokemon got knocked out
+        
+        # HP advantage reward (reduced weight to prioritize KOs)
         our_hp_pct = (our_active.hp / our_active.max_hp) * 100 if our_active.max_hp > 0 else 0
         opp_hp_pct = (opp_active.hp / opp_active.max_hp) * 100 if opp_active.max_hp > 0 else 0
         hp_diff = our_hp_pct - opp_hp_pct
-        reward += hp_diff * 0.5
-        
-        # KO bonuses
-        if opp_active.hp == 0 and opp_hp_before > 0:
-            reward += 5.0  # Knocked out opponent
-        
-        if our_active.hp == 0 and our_hp_before > 0:
-            reward -= 5.0  # Got knocked out
+        reward += hp_diff * 0.2  # Reduced from 0.5
         
         # Damage dealt/received rewards
         damage_dealt = opp_hp_before - opp_active.hp
@@ -498,8 +502,8 @@ class PokemonBattleEnv(gym.Env):
         reward += damage_dealt / 100.0
         reward -= damage_taken / 100.0
         
-        # Turn efficiency penalty (encourage faster wins)
-        reward -= 0.1
+        # Turn efficiency penalty (encourage faster, more decisive play)
+        reward -= 0.05  # Reduced from 0.1
         
         return reward
     

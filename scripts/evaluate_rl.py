@@ -10,6 +10,20 @@ from src.agents import RandomAgent, HeuristicAgent
 logger = logging.getLogger(__name__)
 
 
+def _extract_alive_counts(info: dict) -> tuple[int | None, int | None]:
+    """Extract alive-Pokemon counts from env info across schema variants."""
+    our_alive = info.get("our_alive")
+    opp_alive = info.get("opp_alive")
+
+    # Newer env schema uses more explicit keys.
+    if our_alive is None:
+        our_alive = info.get("our_pokemon_alive")
+    if opp_alive is None:
+        opp_alive = info.get("opponent_pokemon_alive")
+
+    return our_alive, opp_alive
+
+
 def evaluate_agent(agent: RLAgent, opponent, n_episodes: int = 100):
     """
     Evaluate trained agent against opponent.
@@ -25,6 +39,10 @@ def evaluate_agent(agent: RLAgent, opponent, n_episodes: int = 100):
     env = PokemonBattleEnv(opponent_agent=opponent)
     
     wins = 0
+    losses = 0
+    draws = 0
+    ko_finishes = 0
+    turn_limit_finishes = 0
     total_rewards = []
     episode_lengths = []
     
@@ -33,6 +51,8 @@ def evaluate_agent(agent: RLAgent, opponent, n_episodes: int = 100):
     for episode in range(n_episodes):
         obs, info = env.reset()
         done = False
+        terminated = False
+        truncated = False
         episode_reward = 0
         steps = 0
         
@@ -46,10 +66,27 @@ def evaluate_agent(agent: RLAgent, opponent, n_episodes: int = 100):
             
             episode_reward += reward
             steps += 1
+
+        # Track how episode ended.
+        if terminated:
+            ko_finishes += 1
+        elif truncated:
+            turn_limit_finishes += 1
         
-        # Check if won
-        if info.get("our_alive", 0) > info.get("opp_alive", 0):
+        # Check outcome. Supports both old and new info key schemas.
+        our_alive, opp_alive = _extract_alive_counts(info)
+        if our_alive is None or opp_alive is None:
+            logger.warning(
+                "Episode %s missing alive-count info keys; treating as draw",
+                episode + 1,
+            )
+            draws += 1
+        elif our_alive > opp_alive:
             wins += 1
+        elif opp_alive > our_alive:
+            losses += 1
+        else:
+            draws += 1
         
         total_rewards.append(episode_reward)
         episode_lengths.append(steps)
@@ -61,13 +98,20 @@ def evaluate_agent(agent: RLAgent, opponent, n_episodes: int = 100):
     win_rate = (wins / n_episodes) * 100
     avg_reward = sum(total_rewards) / len(total_rewards)
     avg_length = sum(episode_lengths) / len(episode_lengths)
+    ko_finish_rate = (ko_finishes / n_episodes) * 100
+    turn_limit_rate = (turn_limit_finishes / n_episodes) * 100
     
     return {
         "win_rate": win_rate,
         "avg_reward": avg_reward,
         "avg_episode_length": avg_length,
         "wins": wins,
-        "losses": n_episodes - wins,
+        "losses": losses,
+        "draws": draws,
+        "ko_finishes": ko_finishes,
+        "turn_limit_finishes": turn_limit_finishes,
+        "ko_finish_rate": ko_finish_rate,
+        "turn_limit_rate": turn_limit_rate,
     }
 
 
@@ -125,8 +169,16 @@ def main():
     logger.info(f"Win Rate: {results['win_rate']:.1f}%")
     logger.info(f"Wins: {results['wins']}")
     logger.info(f"Losses: {results['losses']}")
+    logger.info(f"Draws: {results['draws']}")
     logger.info(f"Average Reward: {results['avg_reward']:.2f}")
     logger.info(f"Average Episode Length: {results['avg_episode_length']:.1f}")
+    logger.info(
+        "Finish Modes: KO=%s (%.1f%%), TurnLimit=%s (%.1f%%)",
+        results["ko_finishes"],
+        results["ko_finish_rate"],
+        results["turn_limit_finishes"],
+        results["turn_limit_rate"],
+    )
 
 
 if __name__ == "__main__":
